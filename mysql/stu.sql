@@ -15,6 +15,13 @@ Date: 2022-12-11 19:42:34
 
 SET FOREIGN_KEY_CHECKS=0;
 
+--
+-- 创建数据库: `stu`
+--
+CREATE DATABASE `stu` DEFAULT CHARACTER SET gbk COLLATE gbk_chinese_ci;
+USE `stu`;
+
+
 -- ----------------------------
 -- Table structure for admininfo
 -- ----------------------------
