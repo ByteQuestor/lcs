@@ -164,17 +164,76 @@
         <div class="table-container">
             <h1>学生个人信息</h1>
             <table class="table-auto w-full border-collapse border border-gray-300">
-            <tr>
-            <td>学号</td>
-            <td>姓名</td>
-            <td>学院</td>
-            <td>性别</td>
-            <td>电话</td>
-            <td>班级</td>
-            <td style="width:200px;">操作</td>
-            </tr>
+                <tr>
+                    <td>学号</td>
+                    <td>姓名</td>
+                    <td>学院</td>
+                    <td>性别</td>
+                    <td>电话</td>
+                    <td>班级</td>
+                    <td style="width:200px;">操作</td>
+                </tr>
+                <?php
+                $rowCount = 0;//表数据总行数
+                $pageSize = 8;//每页显示8行数据
+                //获取当前页 来自身超链接 用户的点击
+                if (empty($_GET['pageNow'])) {
+                    $pageNow = 1;
+                } else {
+                    $pageNow = $_GET['pageNow'];//当前页
+                }
+
+                $pageCount = 0;//一共多少页数据
+
+                $sql = "select count(xuehao) from studentinfo";
+                $res1 = mysqli_query($db, $sql);
+                //取出总行数
+                if ($row1 = mysqli_fetch_row($res1)) {
+                    $rowCount = $row1[0];
+                }
+                //计算 数据总页数
+                $pageCount = ceil($rowCount / $pageSize);
+                //显示某页 学生数据信息条
+                $sql = "select * from studentinfo order by xuehao asc limit " . ($pageNow - 1) * $pageSize . ",$pageSize";
+                $res = mysqli_query($db, $sql);
+                // $result = $db->query($sql);
+                $total = 0;
+                while ($row = $res->fetch_array()) {
+                    $total++;
+                    echo "<tr bgColor='#ffffff'>";
+                    echo "<td>" . $row['xuehao'] . "</td>";
+                    echo "<td>" . $row['name'] . "</td>"; // 假设存在 name 字段
+                    echo "<td>" . $row['xueyuan'] . "</td>";
+                    echo "<td>" . $row['sex'] . "</td>";
+                    echo "<td>" . $row['phone'] . "</td>";
+                    echo "<td>" . $row['classname'] . "</td>";
+                    echo "<td>";
+                    echo "<button class=\"layui-btn layui-btn-danger\" onclick=\"updateinfo(" . $row['xuehao'] . ")\">修改";
+                    echo "<i class=\"layui-icon layui-icon-fonts-clear\" style=\"font-size: 10px; color: #fff;\"></i></button>";
+                    echo "<button class=\"layui-btn layui-btn-danger\" onclick=\"deleteinfo(" . $row['xuehao'] . ")\">删除";
+                    echo "<i class=\"layui-icon layui-icon-delete\" style=\"font-size: 15px; color: #fff;\"></i></button>";
+                    echo "</td>";
+                    echo "</tr>";
+                }
+                if ($total == 0) {
+                    echo "<tr><td colspan='7'>没有记录</td></tr>";
+                }
+                ?>
             </table>
         </div>
+        <div align="center">
+            共 <b><?php echo $rowCount ?></b> 个数据,共<?php echo $pageCount; ?>页
+            <a href="<?php echo $_SERVER['PHP_SELF'] . "?pageNow=1" ?>">首页</a>
+            <a href="<?php echo $_SERVER['PHP_SELF'] ?>?pageNow=<?php if ($pageNow > 1) echo $pageNow - 1; else echo $pageNow = 1; ?>">上一页</a>
+            <?php
+            for ($i = 1; $i <= $pageCount; $i++) {    //$i<=$pagecount(必须是<=)
+                echo "<a href=" . $_SERVER['PHP_SELF'] . "?pageNow=$i" . ">[" . $i . "]</a>";
+            }
+            ?>
+            <a href="<?php echo $_SERVER['PHP_SELF'] ?>?pageNow=<?PHP if ($pageNow < $pageCount - 1) echo $pageNow + 1; else echo $pageCount; ?>">下一页</a>
+            <a href="<?php echo $_SERVER['PHP_SELF'] . "?pageNow={$pageCount}" ?>">尾页</a>
+        </div>
+    </div>
     <script>
         const sidebar = document.getElementById('sidebar');
         const content = document.getElementById('content');
@@ -189,75 +248,7 @@
                 sidebarToggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
             }
         });
-    </script>
-	<?php
-    $rowCount = 0;//表数据总行数
-    $pageSize = 8;//每页显示8行数据
-   //获取当前页 来自身超链接 用户的点击
-   if (empty($_GET['pageNow'])) {
-       $pageNow = 1;
-   }else{
-       $pageNow = $_GET['pageNow'];//当前页
-   }
 
-   $pageCount = 0;//一共多少页数据
-
-   $sql = "select count(xuehao) from studentinfo";
-   $res1 =mysqli_query($db,$sql);
-   //取出总行数
-   if($row1 = mysqli_fetch_row($res1)){
-       $rowCount = $row1[0];
-   }
-   //计算 数据总页数
-   $pageCount = ceil($rowCount/$pageSize);
-   //显示某页 员工数据信息条
-        $sql = "select * from studentinfo order by xuehao asc limit ".($pageNow-1)*$pageSize.",$pageSize";
-        $res =mysqli_query($db,$sql);
-        // $result = $db->query($sql);
-        $total = 0;
-        while ($row =$res->fetch_array()) {
-            $total++;
-        ?>
-
-            <tr bgColor="#ffffff">
-                <td><?php echo $row['xuehao']; ?></td>
-                <td><?php echo $row['username']; ?></td>
-                <td><?php echo $row['xueyuan']; ?></td>
-                <td><?php echo $row['sex']; ?></td>
-                <td><?php echo $row['phone']; ?></td>
-                <td><?php echo $row['classname']; ?></td>
-                <td>
-                    <button class="layui-btn layui-btn-danger" onclick="updateinfo(<?php echo $row['xuehao']; ?>)">修改
-                    <i class="layui-icon layui-icon-fonts-clear" style="font-size: 10px; color: #fff;"></i></button>
-                
-                    <button class="layui-btn layui-btn-danger" onclick="deleteinfo(<?php echo $row['xuehao']; ?>)">删除
-                    <i class="layui-icon layui-icon-delete" style="font-size: 15px; color: #fff;"></i></button>
-                   
-
-                </td>
-            </tr>
-            <?php
-        }
-        if ($total == 0) {
-            echo "没有记录";
-        }
-        ?>
-    </table>
-    <div align="center">
-              共 <b><?php echo $rowCount?></b> 个数据,共<?php echo $pageCount;?>页
-              <a href="<?php echo $_SERVER['PHP_SELF']."?pageNow=1"?>">首页</a>
-    
-              <a href="<?php echo $_SERVER['PHP_SELF']?>?pageNow=<?php if($pageNow>1) echo $pageNow-1;else echo $pageNow=1;?>">上一页</a>
-              <?php
-              for($i=1;$i<=$pageCount;$i++){    //$i<=$pagecount(必须是<=)
-                echo "<a href=".$_SERVER['PHP_SELF']."?pageNow=$i".">[".$i."]</a>";
-              }
-              
-              ?>
-              <a href="<?php echo $_SERVER['PHP_SELF']?>?pageNow=<?PHP if($pageNow<$pageCount-1) echo $pageNow+1; else echo $pageCount;?>">下一页</a>
-              <a href="<?php echo $_SERVER['PHP_SELF']."?pageNow={$pageCount}"?>">尾页</a>
-</div>
-    <script>
         function updateinfo(id) {
             confirm("权限不足");
         }
@@ -266,7 +257,6 @@
             confirm("权限不足");
         }
     </script>
-</div>
 </body>
 
 </html>
